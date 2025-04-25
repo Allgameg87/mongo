@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Мастер | Чиркин Елизар</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-light: #7d6bff;
+            --primary-lighter: #a29bfe;
+            --secondary: #0984e3;
+            --accent: #fd79a8;
+            --accent-light: #ff9ff3;
+            --dark: #0f0f1a;
+            --darker: #0a0a12;
+            --light: #f8f9fa;
+            --light-gray: rgba(255, 255, 255, 0.15);
+            --code-bg: #1e1e2e;
+            --card-bg: linear-gradient(145deg, #161622, #1a1a2a);
+            --transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            --glass: rgba(255, 255, 255, 0.08);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            font-style: normal;
+            font-weight: 100 900;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyeMZhrib2Bg-4.woff2) format('woff2');
+        }
+
+        @font-face {
+            font-family: 'Fira Code';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(https://fonts.gstatic.com/s/firacode/v21/uU9eCBsR6Z2vfE9aq3bL0fxyUs4tcw4W_D1sJVD7MOzlojwUKQ.woff) format('woff');
+        }
+
+        body {
+            background-color: var(--darker);
+            color: var(--light);
+            line-height: 1.7;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(108, 92, 231, 0.2) 0%, transparent 30%),
+                radial-gradient(circle at 85% 85%, rgba(253, 121, 168, 0.2) 0%, transparent 30%),
+                linear-gradient(to bottom, transparent 95%, var(--darker) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none" opacity="0.03"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="white"/></svg>');
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 3rem;
+        }
+
+        header {
+            padding: 8rem 0 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, var(--darker), transparent);
+        }
+
+        .header-decoration {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(108, 92, 231, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(253, 121, 168, 0.25) 0%, transparent 40%);
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .header-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -2;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(145deg, var(--primary-light), var(--accent-light));
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .author {
+            margin-top: 2.5rem;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+        }
+
+        .author:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .author::before {
+            content: "👨‍💻";
+            font-size: 1.2rem;
+        }
+
+        main {
+            padding: 3rem 0 8rem;
+            position: relative;
+        }
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 3.5rem;
+            margin-top: 5rem;
+        }
+
+        .task {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 3.5rem 3rem;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .task::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+        }
+
+        .task::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.07));
+            z-index: -1;
+        }
+
+        .task:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .task-decoration {
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), transparent 70%);
+            opacity: 0.1;
+            z-index: -1;
+            filter: blur(30px);
+        }
+
+        .task-number {
+            position: absolute;
+            top: 2rem;
+            right: 2.5rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            opacity: 0.08;
+            color: var(--light);
+            user-select: none;
+        }
+
+        .task-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--light);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            position: relative;
+        }
+
+        .task-title::before {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            flex-shrink: 0;
+        }
+
+        .task-description {
+            margin-bottom: 2.5rem;
+            opacity: 0.85;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .code-block {
+            position: relative;
+            background: var(--code-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2.5rem 0;
+            font-family: 'Fira Code', monospace;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .code-block pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #e2e2e2;
+            tab-size: 2;
+        }
+
+        .code-block .code-comment {
+            color: #6A9955;
+            font-style: italic;
+        }
+
+        .code-block .code-keyword {
+            color: #569cd6;
+        }
+
+        .code-block .code-string {
+            color: #ce9178;
+        }
+
+        .code-block .code-number {
+            color: #b5cea8;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            background: rgba(255, 255, 255, 0.12);
+            border: none;
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .copy-btn::before {
+            content: "📋";
+            font-size: 1.2rem;
+        }
+
+        .copy-btn.copied::before {
+            content: "✓";
+            color: #4ade80;
+        }
+
+        .task-steps {
+            margin-left: 2rem;
+            margin-bottom: 2.5rem;
+            list-style: none;
+        }
+
+        .task-steps li {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 2.5rem;
+            opacity: 0.9;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .task-steps li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.8rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            box-shadow: 0 0 12px var(--primary-light);
+        }
+
+        .task-steps-title {
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .task-steps-title::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            box-shadow: 0 0 15px var(--primary-light);
+            flex-shrink: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 5rem 0;
+            margin-top: 5rem;
+            font-size: 1.1rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
+        }
+
+        footer::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            border-radius: 4px;
+        }
+
+        .footer-decoration {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(108, 92, 231, 0.15) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.3rem;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Анимации */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating {
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .pulse {
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 15px rgba(125, 107, 255, 0.5); }
+            50% { text-shadow: 0 0 30px rgba(253, 121, 168, 0.7); }
+        }
+
+        /* Специальные эффекты */
+        .glow-text {
+            animation: glow 6s ease-in-out infinite;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Скроллбар */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--primary), var(--primary-light));
+            border-radius: 6px;
+            border: 3px solid var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1400px) {
+            .container {
+                max-width: 1200px;
+            }
+            
+            h1 {
+                font-size: 4rem;
+            }
+            
+            .subtitle {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                padding: 0 2.5rem;
+            }
+            
+            .task-grid {
+                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+                gap: 3rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            h1 {
+                font-size: 3.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.3rem;
+            }
+            
+            .task {
+                padding: 3rem 2.5rem;
+            }
+            
+            .task-number {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 6rem 0 4rem;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .task-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .task {
+                padding: 2.8rem 2.2rem;
+            }
+            
+            .task-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 1.8rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .task {
+                padding: 2.5rem 2rem;
+                border-radius: 22px;
+            }
+            
+            .task-title {
+                font-size: 1.6rem;
+            }
+            
+            .task-description {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Пользовательский курсор */
+        body {
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='10' cy='10' r='8' fill='none' stroke='%236c5ce7' stroke-width='2'/></svg>") 10 10, auto;
+        }
+
+        a, button, .copy-btn {
+            cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'><circle cx='10' cy='10' r='8' fill='%23fd79a8' stroke='%23fff' stroke-width='1'/></svg>") 10 10, pointer;
+        }
+
+        /* Эффект неона для заголовков */
+        .neon-text {
+            text-shadow: 0 0 5px var(--primary-light), 
+                         0 0 10px var(--primary-light), 
+                         0 0 20px var(--primary-light), 
+                         0 0 40px var(--accent), 
+                         0 0 80px var(--accent);
+        }
+
+        /* Анимация градиента */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .gradient-animate {
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-decoration gradient-animate"></div>
+        <div class="header-particles" id="particles-js"></div>
+        <div class="container">
+            <h1 class="floating glow-text neon-text">MongoDB Мастер</h1>
+            <p class="subtitle">Профессиональные решения сложных задач с подробными объяснениями и примерами кода</p>
+            <div class="author pulse glass-effect">Чиркин Елизар</div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="task-grid">
+            <!-- Задание 1 -->
+            <section class="task glass-effect">
+                <div class="task-decoration"></div>
+                <div class="task-number">01</div>
+                <h2 class="task-title">Поиск документов</h2>
+                <p class="task-description">Найти все посты, где есть тег "as", автор содержит "example.ru", а рейтинг больше 100.</p>
+                
+                <div class="task-steps">
+                    <div class="task-steps-title">Условия поиска:</div>
+                    <ul>
+                        <li>Тег "as" должен быть в массиве <code>topics</code></li>
+                        <li>Поле <code>author</code> должно содержать "example.ru" (регулярное выражение)</li>
+                        <li>Поле <code>score</code> должно быть больше 100 (используем оператор <code>$gt</code>)</li>
+                    </ul>
+                </div>
+                
+                <div class="code-block glass-effect">
+                    <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    <pre><code><span class="code-comment">// Поиск документов по нескольким условиям</span>
+db.posts.find({
+    <span class="code-keyword">topics</span>: <span class="code-string">"as"</span>,               <span class="code-comment">// Ищем тег "as" в массиве</span>
+    <span class="code-keyword">author</span>: <span class="code-keyword">/example.ru/</span>,       <span class="code-comment">// Регулярка для поиска в строке</span>
+    <span class="code-keyword">score</span>: { <span class="code-keyword">$gt</span>: <span class="code-number">100</span> }         <span class="code-comment">// Рейтинг больше 100</span>
+})</code></pre>
+                </div>
+
+                <div class="task-steps">
+                    <div class="task-steps-title">Примечания:</div>
+                    <ul>
+                        <li><code>$gt</code> - оператор "greater than" (больше чем)</li>
+                        <li>Регулярные выражения позволяют гибко искать подстроки</li>
+                        <li>Для поиска в массиве используется прямое сравнение</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Задание 2 -->
+            <section class="task glass-effect">
+                <div class="task-decoration"></div>
+                <div class="task-number">02</div>
+                <h2 class="task-title">Добавление документов</h2>
+                <p class="task-description">Добавить два новых поста с разными параметрами в коллекцию posts.</p>
+                
+                <div class="task-steps">
+                    <div class="task-steps-title">Параметры документов:</div>
+                    <ul>
+                        <li><strong>Первый пост:</strong>
+                            <ul>
+                                <li>Текущая дата (<code>new Date()</code>)</li>
+                                <li>Автор: <code>skbx@example.com</code></li>
+                                <li>Теги: <code>["mongodb"]</code> (массив с одним элементом)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Второй пост:</strong>
+                            <ul>
+                                <li>Дата: <code>31 декабря 2021</code> (передаем строку с датой)</li>
+                                <li>Автор: <code>skbx@example.ru</code></li>
+                                <li>Теги не указаны (необязательное поле)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="code-block glass-effect">
+                    <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    <pre><code><span class="code-comment">// Добавляем несколько документов одним запросом</span>
+db.posts.insertMany([
+    {
+        <span class="code-keyword">creation_date</span>: <span class="code-keyword">new Date()</span>,       <span class="code-comment">// Текущая дата и время</span>
+        <span class="code-keyword">author</span>: <span class="code-string">"skbx@example.com"</span>,     <span class="code-comment">// Email автора</span>
+        <span class="code-keyword">topics</span>: [<span class="code-string">"mongodb"</span>]             <span class="code-comment">// Массив тегов</span>
+    },
+    {
+        <span class="code-keyword">creation_date</span>: <span class="code-keyword">new Date(</span><span class="code-string">"2021-12-31"</span><span class="code-keyword">)</span>,  <span class="code-comment">// Конкретная дата</span>
+        <span class="code-keyword">author</span>: <span class="code-string">"skbx@example.ru"</span>       <span class="code-comment">// Другой автор</span>
+        <span class="code-comment">// Поле topics отсутствует</span>
+    }
+])</code></pre>
+                </div>
+
+                <div class="task-steps">
+                    <div class="task-steps-title">Особенности:</div>
+                    <ul>
+                        <li><code>insertMany</code> - для массовой вставки</li>
+                        <li>Даты можно создавать разными способами</li>
+                        <li>Не все поля обязательны (topics во втором документе)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Задание 3 -->
+            <section class="task glass-effect">
+                <div class="task-decoration"></div>
+                <div class="task-number">03</div>
+                <h2 class="task-title">Создание индекса</h2>
+                <p class="task-description">Создать составной индекс для полей first_name и last_name в коллекции users.</p>
+                
+                <div class="task-steps">
+                    <div class="task-steps-title">Действия:</div>
+                    <ul>
+                        <li>Создаем индекс по двум полям одновременно</li>
+                        <li>Проверяем его использование через <code>explain</code></li>
+                        <li>В выводе ищем <code>"IXSCAN"</code> - признак использования индекса</li>
+                    </ul>
+                </div>
+                
+                <div class="code-block glass-effect">
+                    <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    <pre><code><span class="code-comment">// Создание составного индекса
+// 1 - порядок сортировки (по возрастанию)</span>
+db.users.createIndex({
+    <span class="code-keyword">first_name</span>: <span class="code-number">1</span>,
+    <span class="code-keyword">last_name</span>: <span class="code-number">1</span>
+})
+
+<span class="code-comment">// Проверка работы индекса
+// explain("executionStats") показывает статистику выполнения</span>
+db.users.find({
+    <span class="code-keyword">first_name</span>: <span class="code-string">"Иван"</span>,
+    <span class="code-keyword">last_name</span>: <span class="code-string">"Петров"</span>
+}).<span class="code-keyword">explain(</span><span class="code-string">"executionStats"</span><span class="code-keyword">)</span>
+
+<span class="code-comment">// В выводе смотрим:
+// executionStats.executionStages.stage: "IXSCAN" - индекс используется
+// executionStats.executionStages.indexName - имя использованного индекса</span></code></pre>
+                </div>
+
+                <div class="task-steps">
+                    <div class="task-steps-title">Зачем это нужно:</div>
+                    <ul>
+                        <li>Ускорение поиска по этим полям</li>
+                        <li>Оптимизация сложных запросов</li>
+                        <li>Возможность уникальных ограничений</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Задание 4 -->
+            <section class="task glass-effect">
+                <div class="task-decoration"></div>
+                <div class="task-number">04</div>
+                <h2 class="task-title">Анализ данных</h2>
+                <p class="task-description">Посчитать сумму кармы по первым буквам имен для пользователей с более чем 300 визитами.</p>
+                
+                <div class="task-steps">
+                    <div class="task-steps-title">Шаги агрегации:</div>
+                    <ul>
+                        <li>Фильтрация по <code>visits > 300</code> (этап <code>$match</code>)</li>
+                        <li>Извлечение первой буквы имени (функция <code>$substr</code>)</li>
+                        <li>Группировка по первой букве (этап <code>$group</code>)</li>
+                        <li>Суммирование кармы для каждой группы (оператор <code>$sum</code>)</li>
+                    </ul>
+                </div>
+                
+                <div class="code-block glass-effect">
+                    <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    <pre><code><span class="code-comment">// Создаем pipeline агрегации</span>
+db.users.aggregate([
+    <span class="code-comment">// 1. Фильтрация пользователей</span>
+    { <span class="code-keyword">$match</span>: { <span class="code-keyword">visits</span>: { <span class="code-keyword">$gt</span>: <span class="code-number">300</span> } } },
+    
+    <span class="code-comment">// 2. Проекция (выбираем нужные поля)</span>
+    { <span class="code-keyword">$project</span>: {
+        <span class="code-keyword">first_letter</span>: { 
+            <span class="code-keyword">$substr</span>: [<span class="code-string">"$first_name"</span>, <span class="code-number">0</span>, <span class="code-number">1</span>] <span class="code-comment">// Берем 1 символ с позиции 0</span>
+        },
+        <span class="code-keyword">karma</span>: <span class="code-number">1</span> <span class="code-comment">// Включаем поле кармы</span>
+    } },
+    
+    <span class="code-comment">// 3. Группировка и суммирование</span>
+    { <span class="code-keyword">$group</span>: {
+        <span class="code-keyword">_id</span>: <span class="code-string">"$first_letter"</span>, <span class="code-comment">// Группируем по первой букве</span>
+        <span class="code-keyword">total_karma</span>: { <span class="code-keyword">$sum</span>: <span class="code-string">"$karma"</span> }, <span class="code-comment">// Сумма кармы</span>
+        <span class="code-keyword">count</span>: { <span class="code-keyword">$sum</span>: <span class="code-number">1</span> } <span class="code-comment">// Количество в группе</span>
+    } },
+    
+    <span class="code-comment">// 4. Сортировка по букве (опционально)</span>
+    { <span class="code-keyword">$sort</span>: { <span class="code-keyword">_id</span>: <span class="code-number">1</span> } }
+])</code></pre>
+                </div>
+
+                <div class="task-steps">
+                    <div class="task-steps-title">Дополнительно:</div>
+                    <ul>
+                        <li><code>$substr</code> - извлечение подстроки</li>
+                        <li><code>$sum</code> - может суммировать поля или просто считать</li>
+                        <li>Можно добавить сортировку, лимит и другие этапы</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Задание 5 -->
+            <section class="task glass-effect">
+                <div class="task-decoration"></div>
+                <div class="task-number">05</div>
+                <h2 class="task-title">Хранимая функция</h2>
+                <p class="task-description">Создать функцию shuffle для случайного перемешивания символов в строке.</p>
+                
+                <div class="task-steps">
+                    <div class="task-steps-title">Требования:</div>
+                    <ul>
+                        <li>Принимает один параметр - строку</li>
+                        <li>Возвращает строку с перемешанными символами</li>
+                        <li>Использует <code>Math.random()</code> для случайности</li>
+                        <li>Должна быть сохранена в БД</li>
+                    </ul>
+                </div>
+                
+                <div class="code-block glass-effect">
+                    <button class="copy-btn" onclick="copyCode(this)">Копировать</button>
+                    <pre><code><span class="code-comment">// Создаем хранимую функцию в системной коллекции</span>
+db.system.js.insertOne({
+    <span class="code-keyword">_id</span>: <span class="code-string">"shuffle"</span>, <span class="code-comment">// Уникальный идентификатор</span>
+    <span class="code-keyword">value</span>: <span class="code-keyword">function</span>(str) {
+        <span class="code-comment">// 1. Разбиваем строку на массив символов</span>
+        <span class="code-keyword">const</span> chars = str.<span class="code-keyword">split</span>(<span class="code-string">''</span>);
+        
+        <span class="code-comment">// 2. Сортируем случайным образом</span>
+        chars.<span class="code-keyword">sort</span>(() => <span class="code-number">0.5</span> - <span class="code-keyword">Math.random</span>());
+        
+        <span class="code-comment">// 3. Собираем обратно в строку</span>
+        <span class="code-keyword">return</span> chars.<span class="code-keyword">join</span>(<span class="code-string">''</span>);
+    }
+})
+
+<span class="code-comment">// Пример использования:</span>
+<span class="code-keyword">shuffle</span>(<span class="code-string">"пример"</span>)
+<span class="code-comment">// Возможные результаты:
+// "рпеми", "имерп", "мрепи" и т.д.</span></code></pre>
+                </div>
+
+                <div class="task-steps">
+                    <div class="task-steps-title">Как использовать:</div>
+                    <ul>
+                        <li>Функция доступна после создания</li>
+                        <li>Можно вызывать в любых запросах</li>
+                        <li>Полезно для генерации случайных значений</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-decoration"></div>
+        <div class="container">
+            <p>MongoDB Мастер | Профессиональные решения | Чиркин Елизар</p>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Функция для копирования кода
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Плавное появление карточек при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            const tasks = document.querySelectorAll('.task');
+            tasks.forEach((task, index) => {
+                setTimeout(() => {
+                    task.style.opacity = '1';
+                    task.style.transform = 'translateY(0)';
+                    task.style.animation = 'fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards';
+                }, 200 * index);
+            });
+
+            // Создаем частицы для фона
+            createParticles();
+            
+            // Анимация градиента
+            animateGradient();
+        });
+
+        // Создание частиц для фона
+        function createParticles() {
+            const container = document.querySelector('.header-particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Случайные параметры
+                const size = Math.random() * 5 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const delay = Math.random() * 8;
+                const duration = 15 + Math.random() * 30;
+                const opacity = Math.random() * 0.4 + 0.1;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.opacity = opacity;
+                particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                particle.style.zIndex = Math.floor(opacity * 10);
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Анимация градиента
+        function animateGradient() {
+            const gradients = document.querySelectorAll('.gradient-animate');
+            gradients.forEach(gradient => {
+                gradient.style.background = `linear-gradient(135deg, 
+                    rgba(108, 92, 231, 0.3), 
+                    rgba(253, 121, 168, 0.3), 
+                    rgba(125, 107, 255, 0.3))`;
+                gradient.style.backgroundSize = '300% 300%';
+                gradient.style.animation = 'gradientShift 12s ease infinite';
+            });
+        }
+
+        // Параллакс эффект для частиц
+        document.addEventListener('mousemove', (e) => {
+            const particles = document.querySelectorAll('.particle');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            particles.forEach((particle, index) => {
+                const speed = (index % 5) + 1;
+                const moveX = (x - 0.5) * 30 * speed;
+                const moveY = (y - 0.5) * 30 * speed;
+                
+                particle.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+        });
+
+        // Эффект наведения для карточек
+        const tasks = document.querySelectorAll('.task');
+        tasks.forEach(task => {
+            task.addEventListener('mousemove', (e) => {
+                const rect = task.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                task.style.setProperty('--mouse-x', `${x}px`);
+                task.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body>
+</html>
